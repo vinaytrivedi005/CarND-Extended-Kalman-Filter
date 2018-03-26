@@ -25,6 +25,8 @@ void KalmanFilter::Predict() {
   TODO:
     * predict the state
   */
+  
+  // Predict location and calculate state covariance matrix
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
@@ -42,7 +44,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   MatrixXd Si = S.inverse();
   MatrixXd K = P_ * Ht * Si;
 
-  //new estimate
+  // make new estimate of state and calculate state covariance matrix.
   x_ = x_ + (K * y);
   MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
   P_ = (I - K * H_) * P_;
@@ -53,6 +55,8 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
+  
+  // convert current prediction to polar to compare with current measurement.
   float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
   float theta = atan2(x_(1), x_(0));
   float rho_dot;
@@ -61,6 +65,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   } else {
     rho_dot = (x_(0)*x_(2) + x_(1)*x_(3))/rho;
   }
+  
   VectorXd z_predicted(3);
   z_predicted << rho, theta, rho_dot;
   VectorXd y = z - z_predicted;
@@ -70,7 +75,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   MatrixXd Si = S.inverse();
   MatrixXd K = P_ * Ht * Si;
 
-  //new estimate
+  // make new estimate of state and calculate state covariance matrix.
   x_ = x_ + (K * y);
   MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
   P_ = (I - K * H_) * P_;
